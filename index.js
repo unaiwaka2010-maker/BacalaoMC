@@ -1,5 +1,14 @@
 import { Client, GatewayIntentBits } from "discord.js";
 
+// Leer token desde variable de entorno
+const TOKEN = process.env.TOKEN;
+
+// Verificar que el token existe
+if (!TOKEN) {
+  console.error("❌ ERROR: La variable de entorno TOKEN no está definida.");
+  process.exit(1); // Sale del proceso si no hay token
+}
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -8,8 +17,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ]
 });
-
-const TOKEN = process.env.TOKEN;
 
 client.once("ready", () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
@@ -22,8 +29,17 @@ client.on("messageCreate", async (msg) => {
   const role = msg.guild.roles.cache.find(r => r.name === "Verificado");
   if (!role) return msg.reply("❌ Rol 'Verificado' no existe");
 
-  await msg.member.roles.add(role);
-  msg.reply("🐟 Verificado correctamente. Ya puedes entrar a BacalaoMC");
+  try {
+    await msg.member.roles.add(role);
+    msg.reply("🐟 Verificado correctamente. Ya puedes entrar a BacalaoMC");
+  } catch (error) {
+    console.error("❌ Error al asignar rol:", error);
+    msg.reply("❌ No se pudo asignar el rol. Contacta con un admin.");
+  }
 });
 
-client.login(TOKEN);
+// Intentar iniciar sesión y capturar errores de token
+client.login(TOKEN).catch((err) => {
+  console.error("❌ No se pudo iniciar sesión. Token inválido o problemas de conexión.", err);
+  process.exit(1);
+});
