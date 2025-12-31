@@ -1,12 +1,18 @@
 import { Client, GatewayIntentBits } from "discord.js";
+import express from "express";
 
-// Leer token desde variable de entorno
+// ---------- EXPRESS PARA RENDER ----------
+const app = express();
+app.get("/", (req, res) => res.send("Bot de Discord activo!"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Web Service escuchando en puerto ${PORT}`));
+
+// ---------- BOT DE DISCORD ----------
 const TOKEN = process.env.TOKEN;
 
-// Verificar que el token existe
 if (!TOKEN) {
   console.error("❌ ERROR: La variable de entorno TOKEN no está definida.");
-  process.exit(1); // Sale del proceso si no hay token
+  process.exit(1);
 }
 
 const client = new Client({
@@ -38,7 +44,6 @@ client.on("messageCreate", async (msg) => {
   }
 });
 
-// Intentar iniciar sesión y capturar errores de token
 client.login(TOKEN).catch((err) => {
   console.error("❌ No se pudo iniciar sesión. Token inválido o problemas de conexión.", err);
   process.exit(1);
